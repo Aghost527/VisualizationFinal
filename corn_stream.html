@@ -1,0 +1,308 @@
+<meta charset="utf-8">
+<title>Corn Stream Plot</title>
+
+<style>
+.redblock { 
+  z-index: 1; 
+  position: 
+  absolute; 
+  width:80px; 
+  height:25px; 
+  top:200px; 
+  left:280px; 
+  border: 2px solid #000; 
+  background-color: #FFF; 
+} 
+</style>
+
+<p>
+  <label for="nYear" 
+     style="display: inline-block; width: 450px; text-align: right">
+     Year = <span id="nYear-value">…</span>
+  </label>
+  <input type="range" min="1975" max="2016" id="nYear" style="width:40%; text-align: center;">
+</p>
+
+  <select class = "redblock" id="nType" style="display: inline-block; width: 70px; text-align: right; margin-left: 39px; " > <option value ="corn">Corn</option>  <option value="oats">Oats</option> <option value="sorghum">Sorghum</option> <option value ="barley">Barley</option> </select>
+
+<body>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+
+//SVG Time Line==========================================================================
+var widthtime = 800;
+var heightime = 100;
+var margintime = { top: 40, right: 10, bottom: 20, left: 10 };
+
+var svgtime = d3.select('body')
+              .append('svg')
+              .attr('width', widthtime)
+              .attr('height', heightime)
+                .style('display','block')
+                .style('margin', 'auto');
+//legend Text
+svgtime.append("text")             
+    .attr("transform",
+          "translate(" + 10 + " ," + (heightime/2 - 30) + ")")
+    .text("Event:").style('font-size', 20)
+svgtime.append("text") 
+    .attr('id', 'texTimeEvent')          
+    .attr("transform",
+          "translate(" + 70 + " ," + (heightime/2 - 30) + ")")
+    .style('font-size', 20)
+
+var xScaleTime = d3.scaleLinear()
+    .domain([1860, 2016])
+    .range([margintime.left, widthtime - margintime.right]);  // Set margintimes for x specific
+
+var xAxisTime = d3.axisBottom(xScaleTime)
+    .ticks(10)
+    .tickSize(10)
+    .tickPadding(15)
+
+var gX = svgtime.append("g")
+    .attr("class", "axis axis--x").attr('transform','translate(0,'+heightime/2+')')
+    .call(xAxisTime);
+
+var zoom = d3.zoom()
+    .scaleExtent([1, 10])
+    .translateExtent([[0, heightime/2], [widthtime, heightime/2]])
+    .on("zoom", zoomed);
+
+//Label
+var colorTime = ['#fb9a99','#377eb8','#999999','#999999','#999999','#999999','#a65628','#a65628']
+var dots = [1862,1933,1934,1936,1939,1940,2012,2013];
+var lineX1 = [1862,1914,1930,1939,1945]
+var lineX2 = [1910,1918,1940,1945,2016]
+var colorTimeL = ['#984ea3','#ff7f00','#ffff33','#4daf4a','#f781bf','#999999'];
+
+var dotsEvent = ['1862 Homestead Act','1933 Agricultural Adjust Act','1934 Dust Bowl','1936 Dust Bowl','1939 Dust Bowl','1940 Dust Bowl','2012 Drought','2013 Drought'];
+var lineEvent = ['1860~1910 Rail Road Boom', '1914~1918 World War I', '1930s Tractor Machine', '1939~1945 World War II', '1945~now New Machine'];
+var gline = svgtime.append('g').selectAll('timeLine')
+        .data(lineX1)
+          .enter()
+          .append('line')
+          .attr('id', function(d,i){return 'timeLine'+i;})
+          .attr('x1', function(d){return xScaleTime(d);})
+          .attr('y1', heightime/2)
+          .attr('x2', function(d,i){return xScaleTime(lineX2[i]);})
+          .attr('y2', heightime/2)
+            .style('stroke', function(d,i){return colorTimeL[i];})
+            .style('stroke-width', 3).style('opacity', 0.8)
+            .on('click', function(d,i){
+              gline.style('stroke', function(d,i){return colorTimeL[i];})
+              gdots.style('fill', function(d,i){return colorTime[i];})
+              d3.select(this).transition().style('stroke', 'red').duration(200)
+              svgtime.select('#texTimeEvent').text(lineEvent[i]);
+            })
+
+var gdots = svgtime.append('g').selectAll('timedots')
+        .data(dots)
+          .enter()
+          .append('circle')
+          .attr('id', function(d,i){return 'timedots'+i;})
+          .attr('cx', function(d){return xScaleTime(d);})
+          .attr('cy', heightime/2)
+          .attr('r', 4)
+            .style('stroke','none')
+            .style('fill', function(d,i){return colorTime[i];}).style('opacity', 0.5)
+            .on('click', function(d,i){
+              gdots.style('fill', function(d,i){return colorTime[i];})
+              gline.style('stroke', function(d,i){return colorTimeL[i];})
+              d3.select(this).transition().style('fill', 'red').duration(200)
+              svgtime.select('#texTimeEvent').text(dotsEvent[i]);
+            })
+
+svgtime.call(zoom);
+
+function zoomed() {
+  svgtime.attr("transform", d3.event.transform);
+  gline.attr("transform", d3.event.transform).style('stroke-widthtime', 5)
+  gdots.attr("transform", d3.event.transform).attr('r', 3)
+  gX.call(xAxisTime.scale(d3.event.transform.rescaleX(xScaleTime)));
+}
+var width = 800,
+    height = 400;
+
+var n = 42; // number of values
+
+var x = d3.scaleLinear()
+    .domain([0, n-1])
+    .range([0, width]);
+
+var color = ['#fbb4ae','#b3cde3','#ccebc5','#decbe4','#fed9a6','#ffffcc','#e5d8bd','#fddaec']
+
+var area1 = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d, i) { return x(i); })
+    .y0(function(d) { return - d / 120; })
+    .y1(function(d) { return 0; });
+
+var area2 = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d, i) { return x(i); })
+    .y0(function(d) { return d / 120; })
+    .y1(function(d) { return 0; });
+
+var area3 = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d, i) { return x(i); })
+    .y0(function(d) { return 0; })
+    .y1(function(d) { return -d / 120; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style('display','block')
+    .style('margin','auto')
+//legend=============================================================================
+marginLegendL = 30;
+marginLegend = 80;
+textLegend = ['Imports','Production','Beginning Stocks','Exports','Food','Feed','Seed','Ending Stocks'];
+for (var i = 0; i < 8; i++) {
+    svg.append('text')
+        .attr('x', marginLegendL + i*(20 + marginLegend))
+        .attr('y', 40)
+        .text(textLegend[i])
+          .style('font-size', 12)
+
+    svg.append('text')
+        .attr('id', 'legend'+i)
+        .attr('x', marginLegendL + i*(20 + marginLegend) + 25)
+        .attr('y', 18)
+          .style('font-size', 12)
+}
+
+//Load CSV
+//====================================================================================
+var productionD = new Array();
+var beginStocksD = new Array();
+var feedD = new Array();
+var foodD = new Array();
+var seedD = new Array();
+var exportD = new Array();
+var endStocksD = new Array();
+var importD = new Array();
+
+var productionText = new Array();
+var beginStocksText = new Array();
+var feedText = new Array();
+var foodText = new Array();
+var seedText =  new Array();
+var exportText = new Array();
+var endStocksText = new Array();
+var importText = new Array();
+var exportText = new Array();
+
+var count = 0;
+
+d3.select("#nType").on("input", function() {
+   	window.location.href=this.value+'_stream'+'.html'
+});
+
+loadcsv("corndata.csv");
+function loadcsv(csvname){
+d3.csv(csvname, function(error, data) {
+  if (error) throw error;
+    //Second SVG======================================================================
+    //Transform dataSet
+  for (var i = 0; i < data.length; i ++) {
+      beginStocksD.push(parseInt(data[i].Beginning_Stocks));
+      count = beginStocksD[i] + parseInt(data[i].Production);
+      productionD.push(count);
+      count = productionD[i] + parseInt(data[i].Imports);
+      importD.push(count);
+
+      endStocksD.push(parseInt(data[i].Ending_Stocks));
+      count = parseInt(data[i].Seed_use)+endStocksD[i];
+      seedD.push(count)
+      count = parseInt(data[i].Feed_use)+seedD[i];
+      feedD.push(count);
+      count = feedD[i] + parseInt(data[i].Food_alcohol_and_industrial_use);
+      foodD.push(count);
+      count = foodD[i]+parseInt(data[i].Exports)
+      exportD.push(count)
+
+      productionText.push(data[i].Production)
+      beginStocksText.push(data[i].Beginning_Stocks)
+      feedText.push(data[i].Feed_use)
+      foodText.push(data[i].Food_alcohol_and_industrial_use)
+      exportText.push(data[i].Exports)
+      endStocksText.push(data[i].Ending_Stocks)
+      seedText.push(data[i].Seed_use)
+      importText.push(data[i].Imports)
+  }
+  //console.log(exportD)
+  transformP = [[importD],[productionD],[beginStocksD],[exportD],[foodD],[feedD],[seedD],[endStocksD]];
+  transformD = [importD,productionD,beginStocksD,exportD,foodD,feedD,seedD,endStocksD];
+  transformT = [importText,productionText,beginStocksText,exportText,foodText,feedText,seedText,endStocksText];
+
+  for (var i = 0; i < 3; i++) {
+      svg.selectAll('pathUP')
+         .data(transformP[i])
+         .enter().append("path")
+         .attr('id', 'path'+i)
+         .attr("transform", function(d, i) { return "translate(0," + height/2  + ")"; })
+         .style("fill", color[i])
+         .style('stroke', 'white')
+         .attr("d", area1)
+
+      svg.append('rect')
+        .attr('x', marginLegendL + i*(20 + marginLegend))
+        .attr('y', 10)
+        .attr('width', 20)
+        .attr('height', 8)
+          .style('fill', color[i]) 
+          .style('stroke','gray')
+  }
+
+  for (var i = 3; i < 8; i++) {
+      svg.selectAll('pathDown')
+         .data(transformP[i])
+         .enter().append("path")
+         .attr('id', 'path'+i)
+         .attr("transform", function(d, i) { return "translate(0," + height/2 + ")"; })
+         .style("fill", color[i])
+         .style('stroke', 'white')
+         .attr("d", area2)
+
+      svg.append('rect')
+        .attr('x', marginLegendL + i*(20 + marginLegend))
+        .attr('y', 10)
+        .attr('width', 20)
+        .attr('height', 8)
+          .style('fill', color[i]) 
+          .style('stroke','gray')
+  }
+
+  d3.select("#nYear").on("input", function() {
+    update(+this.value);
+  });
+  update(1975);
+
+  svg.append('line')
+    .attr('id', 'legendL')
+    .attr('y1',55)
+    .attr('y2',height)
+    .style('stroke','white')
+    .style('stroke-width',3)
+
+  function update(nYear) {
+      d3.select("#nYear-value").text(nYear);
+      d3.select("#nYear").property("value", nYear);
+      svg.select('#legendL')
+          .attr('x1',x(nYear - 1975))
+          .attr('x2',x(nYear - 1975))
+           .style('opacity', 0.5)
+      
+      for (var i = 0; i < 8; i++) {
+        svg.select('#legend' + i)
+            .text(transformT[i][nYear-1975])
+      }
+  } 
+});}
+svg.append('text')
+    .attr('x', width - 150)
+    .attr('y', height - 10).style('font-size',15)
+      .text('unit: million metric tons');
+</script>

@@ -1,0 +1,697 @@
+<meta charset="utf-8">
+<title>Barley Price</title>
+
+<style>
+.redblock { 
+  z-index: 1; 
+  position: 
+  absolute; 
+  width:80px; 
+  height:25px; 
+  top:515px; 
+  left:690px; 
+  border: 2px solid #000; 
+  background-color: #FFF; 
+} 
+</style>
+
+<p>
+  <label for="nYear" 
+     style="display: inline-block; width: 450px; text-align: right">
+     Year = <span id="nYear-value">…</span>
+  </label>
+  <input type="range" min="1866" max="2016" id="nYear" style="width:40%; text-align: center;">
+</p>
+
+  <select class = "redblock" id="nType" style="display: inline-block; width: 70px; text-align: right; margin-left: 39px; " > <option value ="barley">Barley</option> <option value="oats">Oats</option> <option value ="corn">Corn</option> <option value="sorghum">Sorghum</option> </select>
+
+<body>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+
+//SVG Time Line==========================================================================
+var widthtime = 800;
+var heightime = 100;
+var margintime = { top: 40, right: 10, bottom: 20, left: 10 };
+
+var svgtime = d3.select('body')
+              .append('svg')
+              .attr('width', widthtime)
+              .attr('height', heightime)
+                .style('display','block')
+                .style('margin', 'auto');
+//legend Text
+svgtime.append("text")             
+    .attr("transform",
+          "translate(" + 10 + " ," + (heightime/2 - 20) + ")")
+    .text("Event:").style('font-size', 20)
+svgtime.append("text") 
+    .attr('id', 'texTimeEvent')          
+    .attr("transform",
+          "translate(" + 70 + " ," + (heightime/2 - 20) + ")")
+    .style('font-size', 20)
+
+var xScaleTime = d3.scaleLinear()
+    .domain([1860, 2016])
+    .range([margintime.left, widthtime - margintime.right]);  // Set margintimes for x specific
+
+var xAxisTime = d3.axisBottom(xScaleTime)
+    .ticks(10)
+    .tickSize(10)
+    .tickPadding(5)
+
+var gX = svgtime.append("g")
+    .attr("class", "axis axis--x").attr('transform','translate(0,'+heightime/2+')')
+    .call(xAxisTime);
+
+var zoom = d3.zoom()
+    .scaleExtent([1, 10])
+    .translateExtent([[0, heightime/2], [widthtime, heightime/2]])
+    .on("zoom", zoomed);
+
+//Label
+var colorTime = ['#fb9a99','#377eb8','#999999','#999999','#999999','#999999','#a65628','#a65628']
+var dots = [1862,1933,1934,1936,1939,1940,2012,2013];
+var lineX1 = [1862,1914,1930,1939,1945]
+var lineX2 = [1910,1918,1940,1945,2016]
+var colorTimeL = ['#984ea3','#ff7f00','#ffff33','#4daf4a','#f781bf','#999999'];
+
+var dotsEvent = ['1862 Homestead Act','1933 Agricultural Adjust Act','1934 Dust Bowl','1936 Dust Bowl','1939 Dust Bowl','1940 Dust Bowl','2012 Drought','2013 Drought'];
+var lineEvent = ['1860~1910 Rail Road Boom', '1914~1918 World War I', '1930s Tractor Machine', '1939~1945 World War II', '1945~now New Machine'];
+var gline = svgtime.append('g').selectAll('timeLine')
+        .data(lineX1)
+          .enter()
+          .append('line')
+          .attr('id', function(d,i){return 'timeLine'+i;})
+          .attr('x1', function(d){return xScaleTime(d);})
+          .attr('y1', heightime/2)
+          .attr('x2', function(d,i){return xScaleTime(lineX2[i]);})
+          .attr('y2', heightime/2)
+            .style('stroke', function(d,i){return colorTimeL[i];})
+            .style('stroke-width', 3).style('opacity', 0.8)
+            .on('click', function(d,i){
+              gline.style('stroke', function(d,i){return colorTimeL[i];})
+              gdots.style('fill', function(d,i){return colorTime[i];})
+              d3.select(this).transition().style('stroke', 'red').duration(200)
+              svgtime.select('#texTimeEvent').text(lineEvent[i]);
+            })
+
+var gdots = svgtime.append('g').selectAll('timedots')
+        .data(dots)
+          .enter()
+          .append('circle')
+          .attr('id', function(d,i){return 'timedots'+i;})
+          .attr('cx', function(d){return xScaleTime(d);})
+          .attr('cy', heightime/2)
+          .attr('r', 4)
+            .style('stroke','none')
+            .style('fill', function(d,i){return colorTime[i];}).style('opacity', 0.5)
+            .on('click', function(d,i){
+              gdots.style('fill', function(d,i){return colorTime[i];})
+              gline.style('stroke', function(d,i){return colorTimeL[i];})
+              d3.select(this).transition().style('fill', 'red').duration(200)
+              svgtime.select('#texTimeEvent').text(dotsEvent[i]);
+            })
+
+svgtime.call(zoom);
+
+function zoomed() {
+  svgtime.attr("transform", d3.event.transform);
+  gline.attr("transform", d3.event.transform).style('stroke-widthtime', 5)
+  gdots.attr("transform", d3.event.transform).attr('r', 3)
+  gX.call(xAxisTime.scale(d3.event.transform.rescaleX(xScaleTime)));
+}
+//SVG TOP==========================================================================
+var widthtop = 800,
+    heighttop = 50;
+
+//var color = ['#a6cee3','#1f78b4','#b2df8a','#33a02c']
+var svgtop = d3.select("body").append("svg")
+    .attr("width", widthtop)
+    .attr("height", heighttop)
+    .style('display','block')
+    .style('margin','auto')
+
+svgtop.append('text')
+    .attr('x', 300)
+    .attr('y', 20)
+    .style('font-size', 20)
+    .text('Harvested Acreages')
+
+svgtop.append('text')
+    .attr('x', 470)
+    .attr('y', 20)
+    .style('font-size', 12)
+    .text('(million acres)')
+//=================================================================================
+var width = 800,
+    height = 300;
+
+//var color = ['#a6cee3','#1f78b4','#b2df8a','#33a02c']
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style('display','block')
+    .style('margin','auto')
+
+//SVG Middle text==========================================================================
+var widthM = 800,
+    heightM = 50;
+
+//var color = ['#a6cee3','#1f78b4','#b2df8a','#33a02c']
+var svgM = d3.select("body").append("svg")
+    .attr("width", widthtop)
+    .attr("height", heighttop)
+    .style('display','block')
+    .style('margin','auto')
+
+svgM.append('text')
+    .attr('x', 340)
+    .attr('y', 40)
+    .style('font-size', 20)
+    .text('Data of ')
+//boundary==========================================================================
+marginBound = {left: 3, top:3}
+bound = {w: 2 * width/3, h: height - 6}
+svg.append('rect')
+    .attr('x', marginBound.left)
+    .attr('y', marginBound.top)
+    .attr('width', bound.w)
+    .attr('height', bound.h)
+      .style('fill', 'none')
+      .style('stroke', '#ece7f2')
+      .style('stroke-width',2)
+svg.append('rect')
+    .attr('x', marginBound.left + bound.w)
+    .attr('y', marginBound.top)
+    .attr('width', width/3 - 4)
+    .attr('height', bound.h)
+      .style('fill', 'none')
+      .style('stroke', '#ece7f2')
+      .style('stroke-width',2)
+svg.append('line')
+    .attr('x1', marginBound.left + bound.w)
+    .attr('x2', width)
+    .attr('y1', height/2)
+    .attr('y2', height/2)
+      .style('stroke', '#ece7f2')
+      .style('stroke-width',2)
+//Stack Path1=========================================================================
+var x = d3.scaleLinear()
+    .domain([0, 149])
+    .range([marginBound.left + 2, bound.w - marginBound.left]);
+
+var colorP = ['#bebada','#fb8072','#ffffb3','#8dd3c7']
+
+var area0 = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d, i) { return x(i); })
+    .y0(function(d) { return -d/1.5; })
+    .y1(function(d) { return d/1.5; });
+
+var textLegendStack = ['Sorghum','Barley','Oats','Corn'];
+//Properties Of Pie===================================================================
+var rPie = 60;
+var arc = d3.arc()
+          .innerRadius(0)
+          .outerRadius(rPie);
+
+var pie = d3.pie()
+        .value(function(d) { return d; })
+        .sort(null);
+
+for (var i = 0; i < 4; i++) {
+  svg.append('rect')
+      .attr('id', 'pie'+i)
+      .attr('x', 2*width/3 + 20)
+      .attr('y', 0.5*height + 30*i + 20)
+      .attr('width', 20)
+      .attr('height', 10)
+        .style('stroke','none')
+        .style('fill',colorP[i])
+
+  svg.append('text')
+      //.attr('id', 'pieLegend'+i)
+      .attr('x', 2*width/3 + 20)
+      .attr('y', 0.5*height + 30*i + 15)
+        .text(textLegendStack[3-i])
+        .style('font-size',12)
+
+  svg.append('text')
+      .attr('id', 'pieLegend'+i)
+      .attr('x', 2*width/3 + 60)
+      .attr('y', 0.5*height + 30*i + 29)
+        //.text(textLegendStack[3-i])
+        .style('font-size',12)
+}
+
+//Properties Of bar===================================================================
+marginBarL = 5;
+marginBar = 5;
+widthBar = (width/3 - 4*marginBarL - marginBar * 3)/4;
+
+svg.append('line')
+    .attr('x1', marginBound.left + bound.w + marginBarL)
+    .attr('x2', width - marginBarL)
+    .attr('y1', height/2 - 20)
+    .attr('y2', height/2 - 20)
+      .style('stroke','black')
+
+for (var i = 0; i < 4; i++) {
+  svg.append('rect')
+      .attr('id', 'bar'+i)
+      .attr('x', 2*marginBarL + bound.w + i * (widthBar + marginBar))
+      .attr('width', widthBar)
+        .style('stroke','none')
+        .style('fill',colorP[i])
+
+  svg.append('text')
+      .attr('x', 2*marginBarL + bound.w + i * (widthBar + marginBar))
+      .attr('y', height/2 - 10)
+        .text(textLegendStack[3-i])
+        .style('font-size',12)
+
+  svg.append('text')
+      .attr('id','barLegend'+i)
+      .attr('x', 2*marginBarL + bound.w + i * (widthBar + marginBar))
+        .style('font-size',12)
+}
+
+//SVG2================================================================================
+var marginMatrix = {top: 30, bottom: 30, left: 80, right: 80};
+
+var widthMatrix = 350;
+var heightMatrix = widthMatrix*0.3;
+
+var widthMSVG = 2 * widthMatrix + 2 * marginMatrix.left + marginMatrix.right;
+var heightMSVG = 2 * heightMatrix  + 2 * marginMatrix.top + marginMatrix.bottom;
+
+var svgMatrix = d3.select('body').append('svg')
+          .attr('width', widthMSVG)
+          .attr('height', heightMSVG)
+            .style('display','block')
+            .style('margin','auto')
+
+var biasOfMatrixX = new Array();
+var biasOfMatrixY = new Array();
+
+for (var j = 0; j < 2; j ++) {
+  for (var i = 0; i < 2; i ++) {
+    biasOfMatrixX.push((i+1) * marginMatrix.left + i * widthMatrix);
+    biasOfMatrixY.push((j+1) * marginMatrix.top + j * heightMatrix);
+  }
+}
+titleMatrix = ['Planted & Harvested Acreages (million)','Production (million bushels)','Yied Per Acre (bushels/acre)','Price (dollars/bushel)'];
+colorMatrix = ['#1f78b4','#33a02c','#e31a1c','#ff7f00','#6a3d9a']
+scaleMatrix = [20,800,80,8];
+
+var x2 = d3.scaleLinear()
+    .domain([0, 150])
+    .range([marginMatrix.left , marginMatrix.left+widthMatrix]);
+
+area1 = d3.area()
+      .curve(d3.curveMonotoneX)
+      .x(function(d, i) {return x2(i); })
+      .y0(function(d) { return -d*heightMatrix/scaleMatrix[0]; })
+      .y1(function(d) { return 0; });
+area2 = d3.area()
+      .curve(d3.curveMonotoneX)
+      .x(function(d, i) {return x2(i); })
+      .y0(function(d) { return -d*heightMatrix/scaleMatrix[1]; })
+      .y1(function(d) { return 0; });
+area3 = d3.area()
+      .curve(d3.curveMonotoneX)
+      .x(function(d, i) {return x2(i); })
+      .y0(function(d) { return -d*heightMatrix/scaleMatrix[2]; })
+      .y1(function(d) { return 0; });
+area4 = d3.area()
+      .curve(d3.curveMonotoneX)
+      .x(function(d, i) {return x2(i); })
+      .y0(function(d) { return -d*heightMatrix/scaleMatrix[3]; })
+      .y1(function(d) { return 0; });
+
+
+for (var i = 0; i < 4; i ++) {
+    //y axis
+    svgMatrix.append('line')
+          .attr('x1', biasOfMatrixX[i])
+          .attr('x2', biasOfMatrixX[i])
+          .attr('y1', biasOfMatrixY[i])
+          .attr('y2', biasOfMatrixY[i] + heightMatrix)
+            .style('stroke', 'black')
+            .style('stroke-width',1)
+    svgMatrix.append('text')
+          .attr('x', biasOfMatrixX[i])
+          .attr('y', biasOfMatrixY[i]-5)
+            .text(titleMatrix[i])
+            .style('font-size', 12)
+    svgMatrix.append('text')
+          .attr('id', 'matrixtext'+i)
+          .attr('x', biasOfMatrixX[i] + widthMatrix - 35)
+          .attr('y', biasOfMatrixY[i]-5)
+            .style('font-size', 12)
+    //x axis
+    svgMatrix.append('line')
+          .attr('x1', biasOfMatrixX[i])
+          .attr('x2', biasOfMatrixX[i] + widthMatrix + marginMatrix.left - marginMatrix.right)
+          .attr('y1', biasOfMatrixY[i] + heightMatrix)
+          .attr('y2', biasOfMatrixY[i] + heightMatrix)
+            .style('stroke', 'black')
+            .style('stroke-width', 1)
+}
+
+for(var i = 0; i < 2; i ++){
+    svgMatrix.append('rect')
+        .attr('x', biasOfMatrixX[0] + widthMatrix - 70 - 70*i)
+        .attr('y', biasOfMatrixY[i] - 15)
+        .attr('width', 20)
+        .attr('height', 8)
+         .style('fill',colorMatrix[i])
+  }
+
+svgMatrix.append('text')
+        .attr('x', biasOfMatrixX[0] + widthMatrix - 70)
+        .attr('y', biasOfMatrixY[0] - 18)
+        .text('Planted')
+          .style('font-size',11)
+svgMatrix.append('text')
+        .attr('x', biasOfMatrixX[0] + widthMatrix - 140)
+        .attr('y', biasOfMatrixY[0] - 18)
+        .text('Harvest')
+          .style('font-size',11)
+
+svgMatrix.append('text')
+        .attr('x', biasOfMatrixX[0] + widthMatrix - 40)
+        .attr('y', biasOfMatrixY[0] - 8)
+        .attr('id','Planted')
+          .style('font-size',11)
+
+svgMatrix.append('text')
+        .attr('x', biasOfMatrixX[0] + widthMatrix - 110)
+        .attr('y', biasOfMatrixY[0] - 8)
+        .attr('id','Harvest')
+          .style('font-size',11)
+//Load CSV
+//====================================================================================
+var plantedAcreage = new Array();
+var yieldAcre = new Array();
+var price = new Array();
+var production = new Array();
+
+var harvestedAcreCorn = new Array();
+var harvestedAcreOats = new Array();
+var harvestedAcreSorghum = new Array();
+var harvestedAcreBarley = new Array();
+
+var harvestedAcreCornT = new Array();
+var harvestedAcreOatsT = new Array();
+var harvestedAcreSorghumT = new Array();
+var harvestedAcreBarleyT = new Array();
+d3.csv('HarvestAcre.csv',function(error,data){
+  for (var i = 0; i < data.length; i++) {
+    harvestedAcreSorghum.push(Math.round(data[i].sorghum))
+    harvestedAcreBarley.push(Math.round(data[i].barley)+harvestedAcreSorghum[i])
+    harvestedAcreOats.push(Math.round(data[i].oats)+harvestedAcreBarley[i])
+    harvestedAcreCorn.push(Math.round(data[i].corn)+harvestedAcreOats[i])
+
+    harvestedAcreSorghumT.push(data[i].sorghum)
+    harvestedAcreBarleyT.push(data[i].barley)
+    harvestedAcreOatsT.push(data[i].oats)
+    harvestedAcreCornT.push(data[i].corn)
+  }
+});
+
+d3.select("#nType").on("input", function() {
+    window.location.href=this.value+'_price'+'.html'
+});
+
+loadcsv("barley_table1.csv");
+function loadcsv(csvname){
+//Load CSV
+//====================================================================================
+d3.csv(csvname, function(error, data) {
+  if (error) throw error;
+
+  for (var i = 0; i < data.length; i++) {
+    plantedAcreage.push(data[i].plantedAcreage)
+    yieldAcre.push(data[i].yield)
+    price.push(data[i].price)
+    production.push(data[i].production)
+  }
+  transformD = [[harvestedAcreCorn],[harvestedAcreOats],[harvestedAcreBarley],[harvestedAcreSorghum]];
+
+  for (var i = 0; i < 4; i++) {
+    svg.selectAll('path'+i)
+         .data(transformD[i])
+         .enter().append("path")
+         .attr("transform", function(d, i) { return "translate(0," + height/2  + ")"; })
+         .style("fill", colorP[i])
+         .style('stroke', 'white')
+         .attr("d", area0)
+  }
+
+  //svg matrix Path
+  //================================================================================================================
+  svgMatrix.selectAll('pathMatrix0')
+           .data([plantedAcreage])
+           .enter().append("path")
+           .attr("transform", function(d, i) { return "translate(0," + (biasOfMatrixY[0] + heightMatrix)  + ")"; })
+           .style("fill", colorMatrix[0])
+           .style('stroke', 'white')
+           .attr("d", area1)
+            .style('opacity', 1)
+  svgMatrix.selectAll('pathMatrix1')
+           .data([harvestedAcreBarleyT])
+           .enter().append("path")
+           .attr("transform", function(d, i) { return "translate(0," + (biasOfMatrixY[0] + heightMatrix)  + ")"; })
+           .style("fill", colorMatrix[1])
+           .style('stroke', 'white')
+           .attr("d", area1)
+            .style('opacity', 1)           
+  svgMatrix.selectAll('pathMatrix2')
+           .data([production])
+           .enter().append("path")
+           .attr("transform", function(d, i) { return "translate("+ (biasOfMatrixX[1]-marginMatrix.left)+',' + (biasOfMatrixY[1] + heightMatrix)  + ")"; })
+           .style("fill", colorMatrix[2])
+           .style('stroke', 'white')
+           .attr("d", area2).style('opacity', 1)
+  svgMatrix.selectAll('pathMatrix3')
+           .data([yieldAcre])
+           .enter().append("path")
+           .attr("transform", function(d, i) { return "translate(0," + (biasOfMatrixY[2] + heightMatrix)  + ")"; })
+           .style("fill", colorMatrix[3])
+           .style('stroke', 'white')
+           .attr("d", area3).style('opacity', 1)
+  svgMatrix.selectAll('pathMatrix4')
+           .data([price])
+           .enter().append("path")
+           .attr("transform", function(d, i) { return "translate("+(biasOfMatrixX[1]-marginMatrix.left)+',' + (biasOfMatrixY[3] + heightMatrix)  + ")"; })
+           .style("fill", colorMatrix[4])
+           .style('stroke', 'white')
+           .attr("d", area4).style('opacity', 1)
+  //================================================================================================================
+  //svg matrix Circle
+  //================================================================================================================
+  //Grid
+  for(var i = 0; i < 4; i ++){
+        for (var k = 1; k < 5; k ++) {
+        svgMatrix.append('line')
+            .attr('x1', biasOfMatrixX[i])
+            .attr('x2', biasOfMatrixX[i] + widthMatrix + marginMatrix.left - marginMatrix.right)
+            .attr('y1', biasOfMatrixY[i] + heightMatrix - k*heightMatrix/4)
+            .attr('y2', biasOfMatrixY[i] + heightMatrix - k*heightMatrix/4)
+              .style('stroke', 'white')
+              .style('opacity', 1)
+
+        svgMatrix.append('text')
+            .attr('x', biasOfMatrixX[i] - 30)
+            .attr('y', biasOfMatrixY[i] + heightMatrix - k*heightMatrix/4 + 5)
+              .text(k * scaleMatrix[i]/4)
+              .style('font-size', 11)
+      }
+    }
+  //Mark
+  for (var i = 0; i < data.length; i++) {
+    svgMatrix.append('circle')
+              .attr('class','class1'+i)
+              .attr('cx', x2(i))
+              .attr('cy', heightMatrix - plantedAcreage[i]*heightMatrix/scaleMatrix[0] + biasOfMatrixY[0])
+              .attr('r',2.5) 
+                .style('opacity', 0) 
+                .style('fill', 'black')
+
+    svgMatrix.append('circle')
+              .attr('class','class2'+i)
+              .attr('cx', x2(i))
+              .attr('cy', heightMatrix - harvestedAcreBarleyT[i]*heightMatrix/scaleMatrix[0] + biasOfMatrixY[0])
+              .attr('r',2.5) 
+                .style('opacity', 0) 
+                .style('fill', 'black')
+
+    svgMatrix.append('circle')
+              .attr('class','class3'+i)
+              .attr('cx', x2(i) + biasOfMatrixX[1] - marginMatrix.left)
+              .attr('cy', heightMatrix - production[i] * heightMatrix/scaleMatrix[1] + biasOfMatrixY[1])
+              .attr('r',2.5) 
+                .style('opacity', 0)
+                .style('fill', 'black') 
+
+    svgMatrix.append('circle')
+              .attr('class','class4'+i)
+              .attr('cx', x2(i))
+              .attr('cy', heightMatrix - yieldAcre[i]*heightMatrix/scaleMatrix[2] + biasOfMatrixY[2])
+              .attr('r',2.5) 
+                .style('opacity', 0)
+                .style('fill', 'black') 
+
+    svgMatrix.append('circle')
+              .attr('class','class5'+i)
+              .attr('cx', x2(i) + biasOfMatrixX[1] - marginMatrix.left)
+              .attr('cy', heightMatrix - price[i]*heightMatrix/scaleMatrix[3] + biasOfMatrixY[3])
+              .attr('r',2.5)
+                .style('opacity', 0) 
+                .style('fill', 'black')
+  }
+  //================================================================================================================
+  //For SVG
+  //================================================================================================================
+  svg.append('line')
+      .attr('id', 'pathL')
+      .attr('y1', marginBound.top + 3)
+      .attr('y2', height - marginBound.top - 3)
+        .style('stroke','white')
+        .style('stroke-width', 2)
+        .style('opacity', 0.5)
+
+  for (var i = 0; i < 4; i++) {
+    svg.append('rect')
+      .attr('x', 15 + i*50)
+      .attr('y', 10)
+      .attr('width', 20)
+      .attr('height', 10)
+        .style('fill',colorP[i])
+        .style('stroke','white')
+
+    svg.append('text')
+        .attr('x', 15 + i*50)
+        .attr('y', 10 + 20)
+        .text(textLegendStack[3-i])
+          .style('font-size', 11)
+
+    svg.append('text')
+        .attr('id','streamL'+(3-i))
+        .attr('x', 35 + i*50)
+        .attr('y', 20)
+          .style('font-size', 11)
+  }
+
+  d3.select("#nYear").on("input", function() {
+    update(+this.value);
+  });
+  update(1866);
+  function update(nYear) {
+      d3.select("#nYear-value").text(nYear);
+      d3.select("#nYear").property("value", nYear);
+
+      svg.select('#pathL')
+          .attr('x1', x(nYear-1866))
+          .attr('x2', x(nYear-1866))
+
+      //show number
+      svg.select('#streamL3')
+            .text(harvestedAcreCornT[nYear-1866])
+      svg.select('#streamL2')
+            .text(harvestedAcreOatsT[nYear-1866])
+      svg.select('#streamL1')
+            .text(harvestedAcreBarleyT[nYear-1866])
+      svg.select('#streamL0')
+            .text(harvestedAcreSorghumT[nYear-1866])
+      //show bar
+      svg.select('#bar0')
+          .transition()
+          .duration(200)
+          .attr('y', height/2 - harvestedAcreCornT[nYear-1866] - 21)
+          .attr('height', harvestedAcreCornT[nYear-1866])
+      svg.select('#bar1')
+          .transition()
+          .duration(200)
+          .attr('y', height/2 - harvestedAcreOatsT[nYear-1866] - 21)
+          .attr('height', harvestedAcreOatsT[nYear-1866])
+      svg.select('#bar2')
+          .transition()
+          .duration(200)
+          .attr('y', height/2 - harvestedAcreBarleyT[nYear-1866] - 21)
+          .attr('height', harvestedAcreBarleyT[nYear-1866])
+      svg.select('#bar3')
+          .transition()
+          .duration(200)
+         .attr('y', height/2 - harvestedAcreSorghumT[nYear-1866] - 21)
+          .attr('height', harvestedAcreSorghumT[nYear-1866])
+      svg.select('#barLegend0')
+          .transition()
+          .duration(200)
+          .attr('y', height/2 - harvestedAcreCornT[nYear-1866] - 22)
+            .text(harvestedAcreCornT[nYear-1866])
+      svg.select('#barLegend1').transition().duration(200)
+          .attr('y', height/2 - harvestedAcreOatsT[nYear-1866] - 22)
+            .text(harvestedAcreOatsT[nYear-1866])
+      svg.select('#barLegend2').transition().duration(200)
+         .attr('y', height/2 - harvestedAcreBarleyT[nYear-1866] - 22)
+            .text(harvestedAcreBarleyT[nYear-1866])
+      svg.select('#barLegend3').transition().duration(200)
+          .attr('y', height/2 - harvestedAcreSorghumT[nYear-1866] - 22)
+            .text(harvestedAcreSorghumT[nYear-1866])
+      //show Pie
+      svg.selectAll('path0')
+              .data(pie([harvestedAcreCornT[nYear-1866],harvestedAcreOatsT[nYear-1866],harvestedAcreBarleyT[nYear-1866],harvestedAcreSorghumT[nYear-1866]]))
+              .enter()
+              .append('path')
+              .attr('d', arc)
+                .attr('transform', 'translate(' +  width*11/12 + ',' + 3*height/4 + ')')
+                .attr('fill', function(d,i){return colorP[i];})
+
+      svg.select('#pieLegend0')
+          .text(Math.round(10000*harvestedAcreCornT[nYear-1866]/harvestedAcreCorn[nYear-1866])/100+'%')
+      svg.select('#pieLegend1')
+          .text(Math.round(10000*harvestedAcreOatsT[nYear-1866]/harvestedAcreCorn[nYear-1866])/100+'%')
+      svg.select('#pieLegend2')
+          .text(Math.round(10000*harvestedAcreBarleyT[nYear-1866]/harvestedAcreCorn[nYear-1866])/100+'%')
+      svg.select('#pieLegend3')
+          .text(Math.round(10000*harvestedAcreSorghumT[nYear-1866]/harvestedAcreCorn[nYear-1866])/100+'%')
+      
+      //show number of matrix
+      svgMatrix.select('#matrixtext1')
+                .text(production[nYear-1866])
+      svgMatrix.select('#matrixtext2')
+                .text(yieldAcre[nYear-1866])
+      svgMatrix.select('#matrixtext3')
+                .text(price[nYear-1866])
+      
+      if(nYear > 1925){
+        svgMatrix.select('#Planted')
+                .text(plantedAcreage[nYear - 1866])
+      }
+      else{
+        svgMatrix.select('#Planted')
+                .text('No data')
+      }
+      svgMatrix.select('#Harvest')
+                .text(harvestedAcreBarleyT[nYear - 1866])
+      
+      svgMatrix.selectAll('circle')
+                //.transition().duration(200)
+                .style('opacity', 0)
+
+      svgMatrix.select('.class1'+(nYear - 1866))
+                .style('opacity', 0.8)
+      svgMatrix.select('.class2'+(nYear - 1866))//.transition().duration(100)
+                .style('opacity', 0.8)
+      svgMatrix.select('.class3'+(nYear - 1866))//.transition().duration(100)
+                .style('opacity', 0.8)
+      svgMatrix.select('.class4'+(nYear - 1866))//.transition().duration(100)
+                .style('opacity', 0.8)
+      svgMatrix.select('.class5'+(nYear - 1866))//.transition().duration(100)
+                .style('opacity', 0.8)
+  }
+});}
+</script>
