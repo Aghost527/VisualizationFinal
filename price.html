@@ -1,0 +1,253 @@
+<!DOCTYPE html> <meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+<script src="https://d3js.org/d3.v3.min.js"></script> 
+<script src="https://d3js.org/topojson.v1.min.js"></script> 
+<script src="https://d3js.org/queue.v1.min.js"></script>
+<style>
+.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 290px;
+    height:48px;
+    padding: 2px;
+    font: 22px sans-serif;
+    background: #fa1;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+} 
+.tooltip2 {
+    position: absolute;
+    text-align: center;
+    border:2px  solid ;
+    border-color:#000;
+    width: 94px;
+    height:48px;
+    /*padding: 2px;*/
+    font: 16px sans-serif;
+    background: #fff;
+    border-radius: 8px;
+    pointer-events: none;
+} 
+.states {
+  fill: #e5e5e5;
+  stroke: #fff;
+  stroke-width:1px;
+}
+.cities {
+  fill: red;
+  opacity:0.7;
+}
+ 
+</style> 
+<body>
+  <!--  <p> <label for="nYear" 
+     style="display: inline-block; width: 240px; text-align: right"> year = <span id="nYear-value">2000</span> </label> <input type="range" min="1980" max="2010" id="nYear"> 
+      <select id="nType" style="display: inline-block; width: 70px; text-align: right; margin-left: 39px;" > <option value ="Barley">Barley</option> <option value ="Corn">Corn</option> <option value="Sorghum">Sorghum</option> <option value="Oats">Oats</option> </select>
+      <button type="button" onclick="javascript:window.location.href='stream.html'">Stream</button>
+    </p>
+  <div class="tooltip" style="opacity: 0; left: 361px; top: 297px;">   </div> -->
+</body>
+<script>
+  //tooptip
+  var div = d3.select('body')
+      .append('div')
+      .attr('class', 'tooltip')
+      .style('opacity', 0);
+  var div2 = d3.select('body')
+      .append('div')
+      .attr('class', 'tooltip2')
+      .style('opacity', 0);
+
+    function update(nYear) {
+         // adjust the text on the range slider
+        d3.select("#nYear-value").text(nYear);
+        d3.select("#nYear").property("value", nYear);
+     }
+
+ 
+var width = 980,
+  height = 600;
+
+var maxValue=[];//Barley,Corn,Oats,Sorghum
+
+var svg = d3.select('body').append('svg')
+    .attr('width', width)
+    .attr('height', height);
+ 
+var projection = d3.geo.albersUsa()
+  .scale(580)
+  .translate([width / 4, height / 2]);
+
+var path = d3.geo.path()
+  .projection(projection);  
+
+queue()
+  .defer(d3.json, 'states.json')
+  .defer(d3.json, 'cities.json')
+  // .defer(d3.csv,'price.csv')
+  .defer(d3.csv,"domestic.csv")
+  .await(makeMyMap);
+
+function makeMyMap(error, states, cities,  domestic) {
+  //console.log(domestic)
+ 
+  var  market="Kansas City, MO";
+
+  svg.append('path')
+    .datum(topojson.feature(states, states.objects.usStates))
+      .attr('d', path)
+      .attr('class', 'states')
+
+  svg.selectAll('.cities')
+    .data(cities.features)
+    .enter()
+    .append('path')
+    .style("fill",function(d){
+        if(cityFilter(d.properties.NAME)) 
+            return "grey";
+        else return ""
+    })
+    .attr('d', path.pointRadius(8))
+    .attr('class', 'cities')
+     .on('mouseover', function (d) {
+                    //console.log(d)
+                    div.transition().style('opacity', 0.5);
+                    div.html(d.properties.NAME  )
+                            .style("left", (d3.event.pageX-140) + "px")   
+                            .style("top", (d3.event.pageY - 28) + "px"); 
+                    market=d.properties.NAME
+                    if(cityFilter(d.properties.NAME) ==false)
+                        createFlow()
+                    })
+        .on('mouseout', function(d) {
+                    div.transition()
+                            .style('opacity', 0)});      
+        createFlow()
+function cityFilter(city){
+    citylist=["Lawrenceburg, IN","Fort Worth, TX","IL points, IL","Domestic, East Coast","Gulf ports, LA","Fort Worth, TX","St Louis, MO","New York, NY"];
+    for(var i=0;i<citylist.length;i++){
+      if (citylist[i]==city)
+        
+        return true;
+    }
+    return false;}
+         
+
+function createFlow( ){
+  var input=[];
+  var grainlist=[]
+  var unitlist=[]
+  svg.selectAll(".priceflow").remove()
+  domestic.forEach(function(d){
+          if(d.Market==market){
+              unitlist.push(" dollars per "+d.Unit+" ")
+              grainlist.push(d.Breed+" "+d.Grain)
+              var pricelist=[]
+              for(var j=1974;j<2016;j++){
+                
+                pricelist.push(eval("d.Y"+j))
+              }
+                
+              input.push(pricelist)   
+
+                 }
+              }
+               
+            )
+
+
+  //console.log(input)
+
+  var unitheight=15
+
+  var x = d3.scale.linear()
+      .domain([0, 10 ])
+      .range([0, width/10]);
+
+  var y = d3.scale.ordinal()
+      .domain(d3.range(input.length))
+      .rangePoints([100, height], 1);
+
+  // var color = d3.scale.ordinal()
+  //     .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"]);
+
+  // var color = ['#fdcdac','#cbd5e8','#b3e2cd','#f4cae4','#cccccc','#fff2ae','#f1e2cc','#e6f5c9'];
+  var color = ['#7fc97f','#beaed4','#fdc086','#666666','#386cb0','#efef99','#bf5b17','#f0027f'];
+  var grainMapColor = ["No.2 Barley","No.3 Barley","No.2 Oats","No.2 Sorghum","No.2 white Corn","No.2 yellow Corn" ]
+
+  var area = d3.svg.area()
+      .interpolate("basis")
+      .x(function(d, i) { return x(i); })
+      .y0(function(d) { return -d*unitheight / 2; })
+      .y1(function(d) { return 0; });
+
+  //console.log(input.length+","+x(1))
+     
+  svg.selectAll("path2")
+      .data(input)
+      .enter().append("path")
+      .attr("transform", function(d, i) { return "translate(" + width/2+ "," + y(i)  + ")"; })
+      .style("fill", function(d, i) { return color[grainMapColor.indexOf(grainlist[i])]; })
+      .attr("d", area)
+      .attr("class","priceflow");
+
+
+    
+    for(var i=0;i<input.length;i++){
+    
+    svg.append("line")
+      .attr("x1",width/2+x(0))
+      .attr("y1", y(i))
+      .attr("x2",width-70)
+      .attr("y2",y(i))
+      .attr("stroke","black")  
+      .attr("stroke-width",2)
+      .attr("class","priceflow")
+    svg.append("line")
+      .attr("x1",width/2+x(0))
+      .attr("y1", y(i))
+      .attr("x2",width/2+x(0))
+      .attr("y2",y(i)-90)
+      .attr("stroke","black")  
+      .attr("stroke-width",2)
+      .attr("class","priceflow") 
+    svg.selectAll("a").data(["1980","1990","2000","2010"]).enter().append("text").text(function(d){return d;}).attr("x",function(d,j){return width/2+width/10*(j+0.5  )}).attr("y",y(i)+20).attr("font-size","16px").attr("class","priceflow");
+    svg.append("text").text(unitlist[i]+grainlist[i]).attr("x",function(d,j){return width/2+x(0)+20})
+      .attr("y",function(d,j){return y(i)-unitheight*5})
+      .attr("font-size","16px").attr("class","priceflow");
+
+    svg.selectAll("a").data(["0","5   "]).enter().append("text").text(function(d){return d;}).attr("x",function(d,j){return width/2+x(0)-20})
+      .attr("y",function(d,j){return y(i)-unitheight*5*j})
+      .attr("font-size","16px").attr("class","priceflow");
+
+    svg.selectAll("c")
+      .data(input[i])
+      .enter().append("rect")
+      .attr("transform", function(d) { return "translate(" + width/2+ "," + y(i)  + ")"; })
+      .style("fill", function(d, i) { return "#fff"; })
+      .attr("x",function(d,i){return x(0)+width/100*(i-0.5)})
+      .attr("width",width/110)
+      .attr("y",function(d){return -d*unitheight/2;})
+      .attr("height",function(d){return d*unitheight/2;})
+      // .attr("d", area)
+      .attr("class","priceflow")
+      .attr("opacity",0)
+      .on('mouseover', function (d,j) {
+                    div2.transition().style('opacity', 1);
+                    div2.html(d +" dollars"+"<br>" + "in "+(1974+j))
+                            .style("left", (d3.event.pageX) + "px")   
+                            .style("top", (d3.event.pageY - 28) + "px"); 
+                    // svg.append("text").text(1974+j).attr("x", width/4 ).attr("y",height/8 ).attr("font-size","30px").attr("class","ytip")      
+                    })
+      .on('mouseout', function(d) {
+                    div2.transition()
+                            .style('opacity', 0);
+                    // d3.selectAll(".ytip").remove()
+                  })
+    }
+
+  svg.append("text").text(market).attr("x",width/4).attr("y",height/8).attr("font-size","30px").attr("class","priceflow");
+  }
+   
+}
+</script>   </html>
