@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+    function jump(destination){
+        var iframe =document.getElementById("chartArea");
+        url=destination+".html";
+        iframe.src=url;}
+
+    function jumpHTML(destination){
+        var iframe =document.getElementById("chartannote");
+        url=destination+".html";
+        iframe.src=url;
+        }
+</script>
+</head>
+<body>
+
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">US GRAIN</a>
+    </div>
+    <div>
+        <ul class="nav navbar-nav">
+            <li onclick="jumpHTML('Introduction'); jump('IntroductionVideo');"><a href="#">Introduction</a></li> 
+           
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    Overview
+                    <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li onclick="jump('overview_barley');jumpHTML('obarley')"><a href="#">Barley</a></li>
+                    <li onclick="jump('overview_corn');jumpHTML('ocorn')"><a href="#">Corn</a></li>
+                    <li onclick="jump('overview_sorghum');jumpHTML('osorghum')"><a href="#">Sorghum</a></li>
+                    <li onclick="jump('overview_oats');jumpHTML('ooats')"><a href="#">Oats</a></li>
+                        
+                </ul>
+            </li>
+
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    Supply&Disappearance
+                    <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li onclick="jump('barley_stream');jumpHTML('barleystreamtxt')"><a href="#">Barley</a></li>
+                    <li onclick="jump('corn_stream');jumpHTML('cornstreamtxt')"><a href="#">Corn</a></li>
+                    <li onclick="jump('sorghum_stream');jumpHTML('sorghumstreamtxt')"><a href="#">Sorghum</a></li>
+                    <li onclick="jump('oats_stream');jumpHTML('oatsstreamtxt')"><a href="#">Oats</a></li>
+                        
+                </ul>
+            </li>
+
+            <li class="dropdown">
+            
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    Imports/Exports
+                    <b class="caret"></b>
+                </a>
+
+                <ul class="dropdown-menu">
+                    <li onclick="jump('map');jumpHTML('maptxt')"><a href="#">Trading Partners</a></li>
+                    <li class="dropdown-submenu"> <a tabindex="-1" href="#">Trading Volumes</a>
+                        <ul class="dropdown-submenu">
+                                <li onclick="jump('heatmap_barley');jumpHTML('heatbarley')"><a tabindex="-1" href="#">Barley</a></li>
+                                <li onclick="jump('heatmap_corn');jumpHTML('heatcorn')"><a tabindex="-1" href="#">Corn</a></li>
+                                <li onclick="jump('heatmap_sorghum');jumpHTML('heatsorghum')"><a tabindex="-1" href="#">Sorghum</a></li>
+                                <li onclick="jump('heatmap_oats');jumpHTML('heatoats')"><a tabindex="-1" href="#">Oats</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            
+            </li>
+            <li onclick="jump('price');jumpHTML('pricetxt')"><a href="#">Domestic Price</a></li>  
+            <li onclick="jump('corn_price');jumpHTML('history')"><a href="#">History</a></li>   
+        </ul>
+    </div>
+
+    </div>
+</nav>
+<table border="0">
+  <th>
+    <div>
+         <iframe id="chartArea" src="IntroductionVideo.html" width="980px" height="900px" scrolling="yes" frameborder="0"> </iframe>
+    </div>
+    </th>
+
+    <th>
+        <iframe id="chartannote" src="Introduction.html" width="400px" height="900px" scrolling="yes" frameborder="0"> </iframe>
+</table>
+
+</body>
+</html>

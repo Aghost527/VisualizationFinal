@@ -1,0 +1,377 @@
+<meta charset="utf-8">
+<title>Barley Exports and Imports</title>
+
+<body>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+//1989~2015 27Years 12months
+//Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug
+var widthSquare = 20;
+var widthSvg = 27*widthSquare + 80;
+var heightSvg = 12*widthSquare + 70;
+
+var colorEx = ['#f7fbff','#c6dbef','#9ecae1','#4292c6','#08519c'];//5 degree
+var colorIm = ['#fff5f0','#fcbba1','#fb6a4a','#cb181d','#67000d'];
+var color =   ['#b2182b','#ef8a62','#fddbc7','#d1e5f0','#67a9cf','#2166ac'];//6 degree
+
+var svgL1 = d3.select('body').append('svg')
+              .attr('width',widthSvg)
+              .attr('height',30)
+                .style('display', 'block')
+                .style('margin', 'auto');
+
+var svg1 = d3.select('body').append('svg')
+              .attr('width',widthSvg)
+              .attr('height',heightSvg)
+                .style('display', 'block')
+                .style('margin', 'auto');
+
+var svgL2 = d3.select('body').append('svg')
+              .attr('width',widthSvg)
+              .attr('height',30)
+                .style('display', 'block')
+                .style('margin', 'auto');
+
+var svg2 = d3.select('body').append('svg')
+              .attr('width',widthSvg)
+              .attr('height',heightSvg)
+                .style('display', 'block')
+                .style('margin', 'auto');
+
+var svgL3 = d3.select('body').append('svg')
+              .attr('width',widthSvg)
+              .attr('height',30)
+                .style('display', 'block')
+                .style('margin', 'auto');
+
+var svg3 = d3.select('body').append('svg')
+              .attr('width',widthSvg)
+              .attr('height',heightSvg)
+                .style('display', 'block')
+                .style('margin', 'auto');
+
+var yAxis = ['Sep.','Oct.','Nov.','Dec.','Jan.','Feb.','Mar.','Apr.','May.','Jun.','Jul.','Aug.'];
+//legend map=================================================================================================================================
+var title = ['Exports', 'Imports', 'Net Exports'];
+svgL1.append('text')
+      .attr('x', 10)
+      .attr('y', 20)
+        .text(title[0]).style('font-size', 17)
+for(var i = 0; i < 5; i ++){
+  svgL1.append('rect')
+        .attr('x', 130 + i * 30)
+        .attr('y', 16)
+        .attr('width', 30)
+        .attr('height', 10)
+          .style('stroke', 'gray')
+          .style('fill', colorEx[i])
+}
+svg1.append('text')
+      .attr('x', widthSvg - 165)
+      .attr('y', heightSvg - 8)
+        .style('font-size', 11)
+        .text('(unit: 10 thousands bushels)')
+
+svgL2.append('text')
+      .attr('x', 10)
+      .attr('y', 20)
+        .text(title[1]).style('font-size', 17)
+for(var i = 0; i < 5; i ++){
+  svgL2.append('rect')
+        .attr('x', 130 + i * 30)
+        .attr('y', 16)
+        .attr('width', 30)
+        .attr('height', 10)
+          .style('stroke', 'gray')
+          .style('fill', colorIm[i])
+}
+svg2.append('text')
+      .attr('x', widthSvg - 165)
+      .attr('y', heightSvg - 8)
+        .style('font-size', 11)
+        .text('(unit: 10 thousands bushels)')
+
+svgL3.append('text')
+      .attr('x', 10)
+      .attr('y', 20)
+        .text(title[2]).style('font-size', 17)
+for(var i = 0; i < 6; i ++){
+  svgL3.append('rect')
+        .attr('x', 130 + i * 30)
+        .attr('y', 16)
+        .attr('width', 30)
+        .attr('height', 10)
+          .style('stroke', 'gray')
+          .style('fill', color[i])
+}
+svg3.append('text')
+      .attr('x', widthSvg - 165)
+      .attr('y', heightSvg - 8)
+        .style('font-size', 11)
+        .text('(unit: 10 thousands bushels)')
+//3 heat map=================================================================================================================================
+var Sep = new Array();
+var Oct = new Array();
+var Nov = new Array();
+var Dec = new Array();
+var Jan = new Array();
+var Feb = new Array();
+var Mar = new Array();
+var Apr = new Array();
+var May = new Array();
+var Jun = new Array();
+var Jul = new Array();
+var Aug = new Array();
+var nest;
+d3.csv('BarleyExport.csv',function(error,data){
+  for(var i = 0; i < data.length; i ++){
+      Sep.push(Number(data[i].Sep));
+      Oct.push(Number(data[i].Oct));
+      Nov.push(Number(data[i].Nov));
+      Dec.push(Number(data[i].Dec));
+      Jan.push(Number(data[i].Jan));
+      Feb.push(Number(data[i].Feb));
+      Mar.push(Number(data[i].Mar));
+      Apr.push(Number(data[i].Apr));
+      May.push(Number(data[i].May));
+      Jun.push(Number(data[i].Jun));
+      Jul.push(Number(data[i].Jul));
+      Aug.push(Number(data[i].Aug)); 
+  }  
+
+  nest = [Sep,Oct,Nov,Dec,Jan,Feb,Mar,Apr,May,Jun,Jul,Aug];
+
+  var maxbuffer = new Array();
+  var minbuffer = new Array();
+  for(var j = 0; j < 12 ; j ++){
+    maxbuffer.push(d3.max(nest[j]))
+    minbuffer.push(d3.min(nest[j]))
+  }
+
+  max = d3.max(maxbuffer);
+  min = d3.min(minbuffer);
+
+
+  var x = d3.scaleLinear()
+    .domain([min, max])
+    .range([0, 4]);
+
+  //console.log(colorEx[8])
+  for (var i = 0; i < 12; i ++) {//row
+    for(var j = 0; j < 27; j ++){//col
+      svg1.append('rect')
+          .attr('x', j * widthSquare + 40)
+          .attr('y', i * widthSquare + 50)
+          .attr('width', widthSquare)
+          .attr('height', widthSquare)
+          .attr('rx', 5)
+          .attr('ry', 5)
+            .style('stroke', 'gray')
+            .style('fill', colorEx[Math.round(x(nest[i][j]))])
+    }
+    svg1.append('text')
+            .attr('x', 0)
+            .attr('y', i * widthSquare + widthSquare/2 + 50)
+            .style('font-size', 12)
+              .text(yAxis[i]);
+  }
+  for(var j = 0; j < 27; j ++){//col
+    svg1.append('text')
+            .style('font-size', 12)
+              .text(j + 1989)
+              .attr("transform", "translate("+ (j*widthSquare+40) +", 40), rotate(-40)");
+  }
+
+  for(var i = 0; i < 6; i ++){
+    svgL1.append('text')
+          .attr('x', 130 + i * 30)
+          .attr('y', 16)
+          .text(Math.round(min/10000 + (max-min)/50000*i))
+            .style('font-size', 12).style('text-anchor','middle')
+  }
+});
+
+//3 heat map=================================================================================================================================
+var Sep1 = new Array();
+var Oct1 = new Array();
+var Nov1 = new Array();
+var Dec1 = new Array();
+var Jan1 = new Array();
+var Feb1 = new Array();
+var Mar1 = new Array();
+var Apr1 = new Array();
+var May1 = new Array();
+var Jun1 = new Array();
+var Jul1 = new Array();
+var Aug1 = new Array();
+var nest1;
+d3.csv('BarleyImports.csv',function(error,data){
+  for(var i = 0; i < data.length; i ++){
+      Sep1.push(Number(data[i].Sep));
+      Oct1.push(Number(data[i].Oct));
+      Nov1.push(Number(data[i].Nov));
+      Dec1.push(Number(data[i].Dec));
+      Jan1.push(Number(data[i].Jan));
+      Feb1.push(Number(data[i].Feb));
+      Mar1.push(Number(data[i].Mar));
+      Apr1.push(Number(data[i].Apr));
+      May1.push(Number(data[i].May));
+      Jun1.push(Number(data[i].Jun));
+      Jul1.push(Number(data[i].Jul));
+      Aug1.push(Number(data[i].Aug)); 
+  }  
+
+  nest1 = [Sep1,Oct1,Nov1,Dec1,Jan1,Feb1,Mar1,Apr1,May1,Jun1,Jul1,Aug1];
+
+  var maxbuffer = new Array();
+  var minbuffer = new Array();
+  for(var j = 0; j < 12 ; j ++){
+    maxbuffer.push(d3.max(nest1[j]))
+    minbuffer.push(d3.min(nest1[j]))
+  }
+  
+  max1 = d3.max(maxbuffer);
+  min1 = d3.min(minbuffer);
+
+  var x = d3.scaleLinear()
+    .domain([min1, max1])
+    .range([0, 4]);
+  //console.log(colorEx[8])
+  for (var i = 0; i < 12; i ++) {//row
+    for(var j = 0; j < 27; j ++){//col
+      svg2.append('rect')
+          .attr('x', j * widthSquare + 40)
+          .attr('y', i * widthSquare + 50)
+          .attr('width', widthSquare)
+          .attr('height', widthSquare)
+          .attr('rx', 5)
+          .attr('ry', 5)
+            .style('stroke', 'gray')
+            .style('fill', colorIm[Math.round(x(nest1[i][j]))]);
+    }
+    svg2.append('text')
+            .attr('x', 0)
+            .attr('y', i * widthSquare + widthSquare/2 + 50)
+            .style('font-size', 12)
+              .text(yAxis[i]);
+  }
+  for(var j = 0; j < 27; j ++){//col
+    svg2.append('text')
+            .style('font-size', 12)
+              .text(j + 1989)
+              .attr("transform", "translate("+ (j*widthSquare+40) +", 40), rotate(-40)");
+  }
+  for(var i = 0; i < 6; i ++){
+    svgL2.append('text')
+          .attr('x', 130 + i * 30)
+          .attr('y', 16)
+          .text(Math.round(min1/10000 + (max1-min1)/50000*i))
+            .style('font-size', 12).style('text-anchor','middle')
+  }
+});
+
+//3 heat map=================================================================================================================================
+var Sep2 = new Array();
+var Oct2 = new Array();
+var Nov2 = new Array();
+var Dec2 = new Array();
+var Jan2 = new Array();
+var Feb2 = new Array();
+var Mar2 = new Array();
+var Apr2 = new Array();
+var May2 = new Array();
+var Jun2 = new Array();
+var Jul2 = new Array();
+var Aug2 = new Array();
+var nest2;
+d3.csv('barley.csv',function(error,data){
+  for(var i = 0; i < data.length; i ++){
+      Sep2.push(Number(data[i].Sep));
+      Oct2.push(Number(data[i].Oct));
+      Nov2.push(Number(data[i].Nov));
+      Dec2.push(Number(data[i].Dec));
+      Jan2.push(Number(data[i].Jan));
+      Feb2.push(Number(data[i].Feb));
+      Mar2.push(Number(data[i].Mar));
+      Apr2.push(Number(data[i].Apr));
+      May2.push(Number(data[i].May));
+      Jun2.push(Number(data[i].Jun));
+      Jul2.push(Number(data[i].Jul));
+      Aug2.push(Number(data[i].Aug)); 
+  }  
+
+  nest2 = [Sep2,Oct2,Nov2,Dec2,Jan2,Feb2,Mar2,Apr2,May2,Jun2,Jul2,Aug2];
+
+  var maxbuffer = new Array();
+  var minbuffer = new Array();
+  for(var j = 0; j < 12 ; j ++){
+    maxbuffer.push(d3.max(nest2[j]))
+    minbuffer.push(d3.min(nest2[j]))
+  }
+  //console.log(nest1)
+  max2 = d3.max(maxbuffer);
+  min2 = d3.min(minbuffer);
+
+  var xIM = d3.scaleLinear()
+    .domain([min2, -1])
+    .range([0, 2]);
+
+  var xEM = d3.scaleLinear()
+    .domain([1, max2])
+    .range([3, 5]);
+
+  //console.log(min2,max2)
+  for (var i = 0; i < 12; i ++) {//row
+    for(var j = 0; j < 27; j ++){//col
+      if(nest2[i][j] > 0)
+        svg3.append('rect')
+            .attr('x', j * widthSquare + 40)
+            .attr('y', i * widthSquare + 50)
+            .attr('width', widthSquare)
+            .attr('height', widthSquare)
+            .attr('rx', 5)
+            .attr('ry', 5)
+              .style('stroke', 'gray')
+              .style('fill', color[Math.round(xEM(nest2[i][j]))]);
+      else
+        svg3.append('rect')
+            .attr('x', j * widthSquare + 40)
+            .attr('y', i * widthSquare + 50)
+            .attr('width', widthSquare)
+            .attr('height', widthSquare)
+            .attr('rx', 5)
+            .attr('ry', 5)
+              .style('stroke', 'gray')
+              .style('fill', color[Math.round(xIM(nest2[i][j]))]);
+    }
+  
+    svg3.append('text')
+            .attr('x', 0)
+            .attr('y', i * widthSquare + widthSquare/2 + 50)
+            .style('font-size', 12)
+              .text(yAxis[i]);
+  }
+
+  for(var j = 0; j < 27; j ++){//col
+    svg3.append('text')
+            .style('font-size', 12)
+              .text(j + 1989)
+              .attr("transform", "translate("+ (j*widthSquare+40) +", 40), rotate(-40)");
+  }
+  for(var i = 0; i < 3; i ++){
+    svgL3.append('text')
+          .attr('x', 130 + i * 30)
+          .attr('y', 16)
+          .text(Math.round(min2/30000*(3-i)))
+            .style('font-size', 12).style('text-anchor','middle')
+  }
+  for(var i = 3; i < 7; i ++){
+    svgL3.append('text')
+          .attr('x', 130 + i * 30)
+          .attr('y', 16)
+          .text(Math.round(max2/30000*(i-3)))
+            .style('font-size', 12).style('text-anchor','middle')
+  }
+});
+
+</script>

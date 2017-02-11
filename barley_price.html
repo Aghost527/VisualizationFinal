@@ -9,7 +9,7 @@
   width:80px; 
   height:25px; 
   top:515px; 
-  left:690px; 
+  left:460px; 
   border: 2px solid #000; 
   background-color: #FFF; 
 } 
@@ -17,10 +17,10 @@
 
 <p>
   <label for="nYear" 
-     style="display: inline-block; width: 450px; text-align: right">
+     style="display: inline-block; width: 150px; text-align: right">
      Year = <span id="nYear-value">…</span>
   </label>
-  <input type="range" min="1866" max="2016" id="nYear" style="width:40%; text-align: center;">
+  <input type="range" min="1866" max="2016" id="nYear" style="width:40%;">
 </p>
 
   <select class = "redblock" id="nType" style="display: inline-block; width: 70px; text-align: right; margin-left: 39px; " > <option value ="barley">Barley</option> <option value="oats">Oats</option> <option value ="corn">Corn</option> <option value="sorghum">Sorghum</option> </select>
@@ -407,19 +407,6 @@ var harvestedAcreCornT = new Array();
 var harvestedAcreOatsT = new Array();
 var harvestedAcreSorghumT = new Array();
 var harvestedAcreBarleyT = new Array();
-d3.csv('HarvestAcre.csv',function(error,data){
-  for (var i = 0; i < data.length; i++) {
-    harvestedAcreSorghum.push(Math.round(data[i].sorghum))
-    harvestedAcreBarley.push(Math.round(data[i].barley)+harvestedAcreSorghum[i])
-    harvestedAcreOats.push(Math.round(data[i].oats)+harvestedAcreBarley[i])
-    harvestedAcreCorn.push(Math.round(data[i].corn)+harvestedAcreOats[i])
-
-    harvestedAcreSorghumT.push(data[i].sorghum)
-    harvestedAcreBarleyT.push(data[i].barley)
-    harvestedAcreOatsT.push(data[i].oats)
-    harvestedAcreCornT.push(data[i].corn)
-  }
-});
 
 d3.select("#nType").on("input", function() {
     window.location.href=this.value+'_price'+'.html'
@@ -431,6 +418,18 @@ function loadcsv(csvname){
 //====================================================================================
 d3.csv(csvname, function(error, data) {
   if (error) throw error;
+
+  for (var i = 0; i < data.length; i++) {
+    harvestedAcreSorghum.push(Math.round(data[i].sorghum))
+    harvestedAcreBarley.push(Math.round(data[i].barley)+harvestedAcreSorghum[i])
+    harvestedAcreOats.push(Math.round(data[i].oats)+harvestedAcreBarley[i])
+    harvestedAcreCorn.push(Math.round(data[i].corn)+harvestedAcreOats[i])
+
+    harvestedAcreSorghumT.push(data[i].sorghum)
+    harvestedAcreBarleyT.push(data[i].barley)
+    harvestedAcreOatsT.push(data[i].oats)
+    harvestedAcreCornT.push(data[i].corn)
+  }
 
   for (var i = 0; i < data.length; i++) {
     plantedAcreage.push(data[i].plantedAcreage)
