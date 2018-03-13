@@ -1,12 +1,10 @@
 Readme
 
-Meng Li, Li545<br>
-Bolun Lin, Aghost527<br>
-Xitong Zhang, XitongZhang1994<br>
+Browse link:
+[Here] (https://aghost527.github.io/DataVisFinal)
 
-Our project link:
-[Here] (https://aghost527.github.io/DataVisFinal/NavigationBar.html)
 
+Other material
 ProcessBook:
 [Here] (https://aghost527.github.io/DataVisFinal/worcester-polytechnic-institute.pdf)
 
